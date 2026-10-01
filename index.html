@@ -1,0 +1,104 @@
+<script>
+    var ytContent = document.createElement("div");
+
+    async function convert() {
+        var inputText = document.getElementById("channelURL").value;
+        var label = document.getElementById("result");
+
+        try {
+            const response = await fetch("https://proxy.corsfix.com/?" + inputText);
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            ytContent.innerHTML = await response.text();
+
+            var channelID = ytContent.querySelector('meta[itemprop="identifier"]').getAttribute("content");
+
+            var contentChoice = document.getElementById("content").value;
+
+            var contentPrefix;
+
+            switch (contentChoice) {
+                case "publicVid":
+                    contentPrefix = "UULF";
+                    break;
+                case "popVid":
+                    contentPrefix = "UULP";
+                    break;
+                case "live":
+                    contentPrefix = "UULV";
+                    break;
+                case "popLive":
+                    contentPrefix = "UUPV";
+                    break;
+                case "shorts":
+                    contentPrefix = "UUSH";
+                    break;
+                case "popShorts":
+                    contentPrefix = "UUPS";
+                    break;
+                case "memberVid":
+                    contentPrefix = "UUMO";
+                    break;
+                case "memberLive":
+                    contentPrefix = "UUMV";
+                    break;
+                case "memberShorts":
+                    contentPrefix = "UUMS";
+                    break;
+                default:
+                    contentPrefix = "UU";
+            }
+
+            var form = document.getElementById("outputTypeForm");
+            var outputType = form.elements["option"].value;
+
+            var outputBase;
+
+            if (outputType === "playlist") {
+                outputBase = "https://www.youtube.com/playlist?list=";
+            }
+
+            if (outputType === "rss") {
+                outputBase = "https://www.youtube.com/feeds/videos.xml?playlist_id=";
+            }
+
+            var output = outputBase + channelID.replace(/^.{2}/g, contentPrefix);
+
+            label.textContent = output;
+            label.setAttribute("href", output);
+        } catch (error) {
+            label.textContent = error;
+        }
+    }
+</script>
+
+<input type="text" id="channelURL" placeholder="Insert Channel Link" /> <br />
+
+<form id="outputTypeForm">
+    <label><input type="radio" name="option" value="playlist" checked />Playlist</label>
+    <label><input type="radio" name="option" value="rss" />RSS Feed</label>
+</form>
+
+<select id="content">
+    <option value="all">All Content</option>
+
+    <option value="publicVid">Videos</option>
+    <option value="popVid">Popular Videos</option>
+
+    <option value="live">Livestreams</option>
+    <option value="popLive">Popular Livestreams</option>
+
+    <option value="shorts">Shorts</option>
+    <option value="popShorts">Popular Shorts</option>
+
+    <option value="memberVid">Member Videos</option>
+    <option value="memberLive">Member Livestreams</option>
+    <option value="memberShorts">Member Shorts</option>
+</select>
+<br />
+<button type="button" onclick="convert()">Convert</button> <br />
+
+<a id="result"></a>
