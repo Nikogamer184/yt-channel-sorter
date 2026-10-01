@@ -9,7 +9,8 @@
             const response = await fetch("https://proxy.corsfix.com/?" + inputText);
 
             if (!response.ok) {
-                throw new Error(`Response status: ${response.status} | ${response.text()}`);
+                const error = await response.text()
+                throw new Error(`Response status: ${response.status} | ${error}`);
             }
 
             ytContent.innerHTML = await response.text();
